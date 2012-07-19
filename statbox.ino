@@ -5,9 +5,14 @@ byte mac[] = { 0x90, 0xA2, 0xDA, 0x0D, 0x7D, 0xEA};
 char server[] = "stat-tron.herokuapp.com";
 EthernetClient client;
 
-int getStatus(void);
+int startPin = 5;
+int ledPins = 3;
 
 void setup() {
+  for (int i=0; i<ledPins; i++){
+    pinMode(startPin + i, OUTPUT);
+    digitalWrite(startPin +i, HIGH);
+  }
   Serial.begin(9600);
   if (Ethernet.begin(mac) == 0) {
     Serial.println("Failed to configure Ethernet using DHCP");
@@ -17,8 +22,9 @@ void setup() {
 }
 
 void loop() {
-  int a = getStatus();
-  Serial.println(a);
+  int status = getStatus();
+  Serial.println(status);
+  setLight(status);
   delay(15000); //15 second delay
 }
 
@@ -46,4 +52,15 @@ int getStatus() {
     client.stop();
   }
   return -1;
+}
+
+void setLight(int id){
+  turnOffAllLights();
+  digitalWrite(startPin + id - 1, HIGH);
+}
+
+void turnOffAllLights(){
+ for (int i=0; i<ledPins; i++){
+    digitalWrite(startPin + i, LOW);
+  }
 }
