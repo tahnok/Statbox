@@ -7,6 +7,7 @@ EthernetClient client;
 
 int startPin = 5;
 int ledPins = 3;
+int PARTY_MODE = 4;
 
 void setup() {
   for (int i=0; i<ledPins; i++){
@@ -24,8 +25,18 @@ void setup() {
 void loop() {
   int status = getStatus();
   Serial.println(status);
-  setLight(status);
-  delay(15000); //15 second delay
+  int counter = 0;
+  while(counter < 30){ //500 ms * 30 = 15 seconds
+    Serial.println("loop");
+    if(status == PARTY_MODE){
+      setLight(random(1,4));
+    } else {
+      setLight(status);
+    }
+    counter++;
+    delay(500);
+  }
+  Serial.println("out of loop");
 }
 
 int getStatus() {
@@ -37,7 +48,7 @@ int getStatus() {
     client.println();
 
     while(!client.available()){}; //TODO timeout?
-
+    Serial.println("client available");
     for (int i = 0; i < 9; ++i) {
       client.read();
     } //read 10 chars
@@ -47,11 +58,11 @@ int getStatus() {
     client.flush();
     client.stop(); //close the connection and flush
 
-    return response;
+    return response -1;
   } else {
     client.stop();
   }
-  return -1;
+  return 4;
 }
 
 void setLight(int id){
