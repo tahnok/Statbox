@@ -1,7 +1,9 @@
 #include <SPI.h>
 #include <Ethernet.h>
+#include <avr/wdt.h>
 
 byte mac[] = { 0x90, 0xA2, 0xDA, 0x0D, 0x7D, 0xEA};
+byte ip[] = { 192, 168, 10, 70 };
 char server[] = "stat-tron.herokuapp.com";
 EthernetClient client;
 
@@ -20,9 +22,11 @@ void setup() {
   } else {
     Serial.println("connected!");
   }
+  wdt_enable(WDTO_8S);
 }
 
 void loop() {
+  wdt_reset();
   int status = getStatus();
   Serial.println(status);
   int counter = 0;
@@ -35,6 +39,7 @@ void loop() {
     }
     counter++;
     delay(500);
+    wdt_reset();
   }
   Serial.println("out of loop");
 }
@@ -47,8 +52,9 @@ int getStatus() {
     client.println("Connection: close");
     client.println();
 
-    while(!client.available()){}; //TODO timeout?
+    while(!client.available()){};
     Serial.println("client available");
+    wdt_reset();
     for (int i = 0; i < 9; ++i) {
       client.read();
     } //read 10 chars
